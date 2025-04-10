@@ -25,7 +25,7 @@ const activityQueue = new Queue("activity-queue", {
 });
 
 const activitySchema = Joi.object({
-  activities: Joi.array().items(Joi.string()).required(),
+  activities: Joi.array().items(Joi.string()).min(1).required(),
   date: Joi.string().required(),
   user_name: Joi.string().required(),
 });
@@ -64,7 +64,7 @@ router.post("/schedule", async (req, res) => {
 
     res.json({
       message: "Activities scheduled successfully",
-      jobId: job.id,
+      jobId: jobId,  // Use the jobId we generated
       scheduledFor: scheduledDate,
     });
   } catch (err) {
@@ -75,8 +75,8 @@ router.post("/schedule", async (req, res) => {
 
 router.get("/jobs/:userName", async (req, res) => {
   try {
-    const completedJobs = await activityQueue.getCompleted();
-    const failedJobs = await activityQueue.getFailed();
+    const completedJobs = await activityQueue.getCompleted() || [];
+    const failedJobs = await activityQueue.getFailed() || [];
 
     const allJobs = [...completedJobs, ...failedJobs];
 
@@ -105,8 +105,8 @@ router.get("/jobs/:userName", async (req, res) => {
 
 router.get("/jobs/:userName/status-count", async (req, res) => {
   try {
-    const completedJobs = await activityQueue.getCompleted();
-    const failedJobs = await activityQueue.getFailed();
+    const completedJobs = await activityQueue.getCompleted() || [];
+    const failedJobs = await activityQueue.getFailed() || [];
 
     const userJobs = [...completedJobs, ...failedJobs].filter(
       (job) => job.data.user_name === req.params.userName
