@@ -1,4 +1,4 @@
-FROM node:18.19-alpine3.19
+FROM node:20-alpine3.19
 
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -7,8 +7,9 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# Install dependencies and clean npm cache
-RUN npm ci --only=production && \
+# Install dependencies with specific npm version and clean npm cache
+RUN npm install -g npm@latest && \
+    npm ci --only=production && \
     npm cache clean --force
 
 COPY --chown=appuser:appgroup . .

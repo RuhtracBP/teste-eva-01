@@ -1,26 +1,33 @@
-const express = require('express');
-const Joi = require('joi');
-const { Queue } = require('bullmq');
-const Redis = require('ioredis');
+const express = require("express");
+const Joi = require("joi");
+const { Queue } = require("bullmq");
+const Redis = require("ioredis");
+const { parseISO, formatISO, addHours } = require("date-fns");
 
 const router = express.Router();
 const connection = new Redis({
-  host: process.env.REDIS_HOST || 'localhost'
+  host: process.env.REDIS_HOST || "localhost",
 });
 
-const activityQueue = new Queue('activity-queue', {
+const activityQueue = new Queue("activity-queue", {
   connection,
   defaultJobOptions: {
     removeOnComplete: false,
     removeOnFail: false,
-    attempts: 3
-  }
+    attempts: 3,
+  },
+  settings: {
+    stalledInterval: 30000,
+    maxStalledCount: 1,
+    lockDuration: 30000,
+    lockRenewTime: 15000,
+  },
 });
 
 const activitySchema = Joi.object({
   activities: Joi.array().items(Joi.string()).required(),
-  date: Joi.date().iso().required(),
-  user_name: Joi.string().required()
+  date: Joi.string().required(),
+  user_name: Joi.string().required(),
 });
 
 router.post("/schedule", async (req, res) => {
@@ -32,24 +39,26 @@ router.post("/schedule", async (req, res) => {
     }
 
     const { activities, date, user_name } = value;
-    const scheduledDate = new Date(date);
+
+    const scheduledDate = parseISO(date);
     const jobId = `${user_name}-${Date.now()}`;
 
-    // Calculate delay in milliseconds
-    const delay = Math.max(0, scheduledDate.getTime() - Date.now());
+    // Calculate delay in milliseconds, adding 3 hours to account for UTC-3
+    const threeHoursInMs = 3 * 60 * 60 * 1000;
+    const delay = scheduledDate - Number(new Date()) + threeHoursInMs;
+    console.log("Delay in ms:", delay);
 
     const job = await activityQueue.add(
       "scheduled-activity",
       {
         activities,
-        date: scheduledDate.toISOString(),
+        date: formatISO(scheduledDate),
         user_name,
         status: "waiting",
       },
       {
         jobId,
         delay,
-        timestamp: scheduledDate.getTime(),
       }
     );
 
@@ -66,17 +75,10 @@ router.post("/schedule", async (req, res) => {
 
 router.get("/jobs/:userName", async (req, res) => {
   try {
-    const waitingJobs = await activityQueue.getWaiting();
-    const activeJobs = await activityQueue.getActive();
     const completedJobs = await activityQueue.getCompleted();
     const failedJobs = await activityQueue.getFailed();
 
-    const allJobs = [
-      ...waitingJobs,
-      ...activeJobs,
-      ...completedJobs,
-      ...failedJobs,
-    ];
+    const allJobs = [...completedJobs, ...failedJobs];
 
     const userJobs = await Promise.all(
       allJobs
@@ -103,21 +105,14 @@ router.get("/jobs/:userName", async (req, res) => {
 
 router.get("/jobs/:userName/status-count", async (req, res) => {
   try {
-    const waitingJobs = await activityQueue.getWaiting();
-    const activeJobs = await activityQueue.getActive();
     const completedJobs = await activityQueue.getCompleted();
     const failedJobs = await activityQueue.getFailed();
 
-    const userJobs = [
-      ...waitingJobs,
-      ...activeJobs,
-      ...completedJobs,
-      ...failedJobs,
-    ].filter((job) => job.data.user_name === req.params.userName);
+    const userJobs = [...completedJobs, ...failedJobs].filter(
+      (job) => job.data.user_name === req.params.userName
+    );
 
     const statusCount = {
-      waiting: userJobs.filter((job) => job.status === "waiting").length,
-      active: userJobs.filter((job) => job.status === "active").length,
       completed: userJobs.filter((job) => job.status === "completed").length,
       failed: userJobs.filter((job) => job.status === "failed").length,
     };

@@ -1,205 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Activity Scheduler</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        #result {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        .status-counts {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-        }
-        .status-count {
-            text-align: center;
-        }
-        .job-list {
-            margin-top: 20px;
-        }
-        .job-item {
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .status-waiting { background-color: #fff3cd; }
-        .status-active { background-color: #cfe2ff; }
-        .status-completed { background-color: #d1e7dd; }
-        .status-failed { background-color: #f8d7da; }
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 8px;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      #result {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+      }
+      .status-counts {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+      }
+      .status-count {
+        text-align: center;
+      }
+      .job-list {
+        margin-top: 20px;
+      }
+      .job-item {
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .status-waiting {
+        background-color: #fff3cd;
+      }
+      .status-active {
+        background-color: #cfe2ff;
+      }
+      .status-completed {
+        background-color: #d1e7dd;
+      }
+      .status-failed {
+        background-color: #f8d7da;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Activity Scheduler</h1>
     <div class="form-group">
-        <label for="userName">User Name:</label>
-        <input type="text" id="userName" required>
+      <label for="userName">User Name:</label>
+      <input type="text" id="userName" required />
     </div>
     <div class="form-group">
-        <label for="activities">Activities (one per line):</label>
-        <textarea id="activities" rows="5" required></textarea>
+      <label for="activities">Activities (one per line):</label>
+      <textarea id="activities" rows="5" required></textarea>
     </div>
     <div class="form-group">
-        <label for="date">Schedule Date and Time:</label>
-        <input type="datetime-local" id="date" required>
+      <label for="date">Schedule Date and Time:</label>
+      <input type="datetime-local" id="date" required />
     </div>
     <button onclick="scheduleActivities()">Schedule Activities</button>
     <button onclick="getJobs()">View My Jobs</button>
-    <div class="status-counts" id="statusCounts"></div>
     <div id="result"></div>
 
     <script>
-        async function scheduleActivities() {
-            const userName = document.getElementById('userName').value;
-            const activitiesText = document.getElementById('activities').value;
-            const date = document.getElementById('date').value;
+      async function scheduleActivities() {
+        const userName = document.getElementById("userName").value;
+        const activitiesText = document.getElementById("activities").value;
+        const date = document.getElementById("date").value;
 
-            if (!userName || !activitiesText || !date) {
-                alert('Please fill all fields');
-                return;
-            }
+        if (!userName || !activitiesText || !date) {
+          alert("Please fill all fields");
+          return;
+        }
 
-            const activities = activitiesText.split('\n').filter(activity => activity.trim());
+        const activities = activitiesText
+          .split("\n")
+          .filter((activity) => activity.trim());
 
-            try {
-                const response = await fetch('/api/activities/schedule', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_name: userName,
-                        activities,
-                        date
-                    })
-                });
+        try {
+          const response = await fetch("/api/activities/schedule", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_name: userName,
+              activities,
+              date,
+            }),
+          });
 
-                const result = await response.json();
-                await updateJobsDisplay();
-            } catch (error) {
-                document.getElementById('result').innerHTML = `
+          const result = await response.json();
+          await updateJobsDisplay();
+        } catch (error) {
+          document.getElementById("result").innerHTML = `
                     <h3>Error:</h3>
                     <pre>${error.message}</pre>
                 `;
-            }
+        }
+      }
+
+      async function updateStatusCounts() {
+        const userName = document.getElementById("userName").value;
+        if (!userName) return;
+
+        try {
+          const response = await fetch(
+            `/api/activities/jobs/${userName}/status-count`
+          );
+          const counts = await response.json();
+        } catch (error) {
+          console.error("Error updating status counts:", error);
+        }
+      }
+
+      async function getJobs() {
+        await updateJobsDisplay();
+      }
+
+      async function updateJobsDisplay() {
+        const userName = document.getElementById("userName").value;
+        if (!userName) {
+          alert("Please enter a user name");
+          return;
         }
 
-        async function updateStatusCounts() {
-            const userName = document.getElementById('userName').value;
-            if (!userName) return;
+        try {
+          await updateStatusCounts();
 
-            try {
-                const response = await fetch(`/api/activities/jobs/${userName}/status-count`);
-                const counts = await response.json();
-                
-                document.getElementById('statusCounts').innerHTML = `
-                    <div class="status-count">
-                        <h4>Waiting</h4>
-                        <div>${counts.waiting}</div>
-                    </div>
-                    <div class="status-count">
-                        <h4>Active</h4>
-                        <div>${counts.active}</div>
-                    </div>
-                    <div class="status-count">
-                        <h4>Completed</h4>
-                        <div>${counts.completed}</div>
-                    </div>
-                    <div class="status-count">
-                        <h4>Failed</h4>
-                        <div>${counts.failed}</div>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error updating status counts:', error);
-            }
-        }
+          const response = await fetch(`/api/activities/jobs/${userName}`);
+          const jobs = await response.json();
 
-        async function getJobs() {
-            await updateJobsDisplay();
-        }
-
-        async function updateJobsDisplay() {
-            const userName = document.getElementById('userName').value;
-            if (!userName) {
-                alert('Please enter a user name');
-                return;
-            }
-
-            try {
-                await updateStatusCounts();
-                
-                const response = await fetch(`/api/activities/jobs/${userName}`);
-                const jobs = await response.json();
-                
-                const jobsList = jobs.map(job => `
+          const jobsList = jobs
+            .map(
+              (job) => `
                     <div class="job-item status-${job.status}">
                         <h4>Job ID: ${job.id}</h4>
                         <p>Status: ${job.status}</p>
-                        <p>Scheduled for: ${new Date(job.scheduledFor).toLocaleString()}</p>
+                        <p>Scheduled for: ${job.scheduledFor}</p>
                         <p>Activities:</p>
                         <ul>
-                            ${job.data.activities.map(activity => `<li>${activity}</li>`).join('')}
+                            ${job.data.activities
+                              .map((activity) => `<li>${activity}</li>`)
+                              .join("")}
                         </ul>
-                        ${job.finishedOn ? `<p>Completed at: ${new Date(job.finishedOn).toLocaleString()}</p>` : ''}
+                        ${
+                          job.finishedOn
+                            ? `<p>Completed at: ${new Date(
+                                job.finishedOn
+                              ).toString()}</p>`
+                            : ""
+                        }
                     </div>
-                `).join('');
+                `
+            )
+            .join("");
 
-                document.getElementById('result').innerHTML = `
+          document.getElementById("result").innerHTML = `
                     <h3>Your Jobs:</h3>
                     <div class="job-list">${jobsList}</div>
                 `;
-            } catch (error) {
-                document.getElementById('result').innerHTML = `
+        } catch (error) {
+          document.getElementById("result").innerHTML = `
                     <h3>Error:</h3>
                     <pre>${error.message}</pre>
                 `;
-            }
         }
+      }
 
-        // Auto-refresh job status every 10 seconds
-        setInterval(() => {
-            const userName = document.getElementById('userName').value;
-            if (userName) {
-                updateJobsDisplay();
-            }
-        }, 10000);
+      // Auto-refresh job status every 10 seconds
+      setInterval(() => {
+        const userName = document.getElementById("userName").value;
+        if (userName) {
+          updateJobsDisplay();
+        }
+      }, 10000);
     </script>
-</body>
+  </body>
 </html>
