@@ -1,44 +1,67 @@
-# Activity Scheduler
+# Agendador de Atividades (Activity Scheduler)
 
-A simple activity scheduler that uses BullMQ for job processing and Joi for input validation.
+## O que é
 
-## Prerequisites
+Um sistema de agendamento de atividades que utiliza BullMQ para processamento de jobs e Joi para validação de dados. O sistema permite agendar atividades para execução futura com gestão robusta de filas e processamento assíncrono.
+
+## Por que resolve o problema
+
+O sistema resolve desafios comuns em ambientes que necessitam de agendamento confiável de tarefas:
+
+- Garante a execução precisa de atividades em horários específicos
+- Oferece tolerância a falhas com tentativas automáticas de reexecução
+- Mantém histórico completo de execuções para auditoria
+- Permite monitoramento em tempo real do status das atividades
+
+## Benefícios
+
+- Interface amigável para agendamento e monitoramento
+- Sistema distribuído e escalável usando Redis
+- Processamento assíncrono robusto
+- Validação rigorosa de dados de entrada
+- Gestão eficiente de filas com BullMQ
+
+## Pré-requisitos
 
 - Docker
 - Docker Compose
 
-## Running with Docker
+## Executando com Docker
 
-1. Build and start the application:
+1. Construa e inicie a aplicação:
+
 ```bash
 docker-compose up --build
 ```
 
-This will start:
-- The web application on port 3000
-- The worker process
-- Redis server on port 6379
+Isso iniciará:
 
-To stop the application:
+- Aplicação web na porta 3000
+- Processo worker
+- Servidor Redis na porta 6379
+
+Para parar a aplicação:
+
 ```bash
 docker-compose down
 ```
 
-3. Open your browser and visit: http://localhost:3000
+3. Abra seu navegador e acesse: http://localhost:3000
 
-## Running Tests
+## Executando Testes
 
 ```bash
 npm test
 ```
 
-## API Endpoints
+## Endpoints da API
 
-- POST `/api/activities/schedule` - Schedule new activities
-- GET `/api/activities/jobs/:userName` - Get all jobs for a specific user
+- POST `/api/activities/schedule` - Agendar novas atividades
+- GET `/api/activities/jobs/:userName` - Obter todas as atividades de um usuário específico
 
-## Frontend
+## Interface Web
 
-The frontend provides a simple interface to:
-- Schedule new activities
-- View scheduled jobs for a user
+A interface fornece um ambiente simples para:
+
+- Agendar novas atividades
+- Visualizar atividades agendadas por usuário
