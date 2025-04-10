@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Activity Scheduler</title>
+    <title>Agendar Jornada</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -75,21 +75,21 @@
     </style>
   </head>
   <body>
-    <h1>Activity Scheduler</h1>
+    <h1>Agendar Jornada</h1>
     <div class="form-group">
-      <label for="userName">User Name:</label>
+      <label for="userName">Nome do Usuário:</label>
       <input type="text" id="userName" required />
     </div>
     <div class="form-group">
-      <label for="activities">Activities (one per line):</label>
+      <label for="activities">Ações da jornada (uma por linha):</label>
       <textarea id="activities" rows="5" required></textarea>
     </div>
     <div class="form-group">
-      <label for="date">Schedule Date and Time:</label>
+      <label for="date">Data e hora da jornada:</label>
       <input type="datetime-local" id="date" required />
     </div>
-    <button onclick="scheduleActivities()">Schedule Activities</button>
-    <button onclick="getJobs()">View My Jobs</button>
+    <button onclick="scheduleActivities()">Agendar</button>
+    <button onclick="getJobs()">Ver Minhas Jornadas</button>
     <div id="result"></div>
 
     <script>
@@ -99,7 +99,7 @@
         const date = document.getElementById("date").value;
 
         if (!userName || !activitiesText || !date) {
-          alert("Please fill all fields");
+          alert("Por favor, preencha todos os campos");
           return;
         }
 
@@ -151,7 +151,7 @@
       async function updateJobsDisplay() {
         const userName = document.getElementById("userName").value;
         if (!userName) {
-          alert("Please enter a user name");
+          alert("Por favor, insira um nome de usuário");
           return;
         }
 
@@ -187,12 +187,12 @@
             .join("");
 
           document.getElementById("result").innerHTML = `
-                    <h3>Your Jobs:</h3>
+                    <h3>Minhas Jornadas:</h3>
                     <div class="job-list">${jobsList}</div>
                 `;
         } catch (error) {
           document.getElementById("result").innerHTML = `
-                    <h3>Error:</h3>
+                    <h3>Erro:</h3>
                     <pre>${error.message}</pre>
                 `;
         }
