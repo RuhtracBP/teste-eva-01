@@ -25,6 +25,7 @@ O sistema resolve desafios comuns em ambientes que necessitam de agendamento con
 
 - Docker
 - Docker Compose
+- Node.js
 
 ## Executando com Docker
 
@@ -51,6 +52,7 @@ docker-compose down
 ## Executando Testes
 
 ```bash
+npm install
 npm test
 ```
 
